@@ -2,6 +2,8 @@ package com.example.proyfin1.pantallas
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -13,9 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.proyfin1.data.ListaPokemons
+import com.example.proyfin1.data.Result
+import com.example.proyfin1.mvvm.PokemonViewModel
 
 @Composable
 fun PokemonsPantalla(navController: NavController){
+    val pokemonViewModel : PokemonViewModel = PokemonViewModel()
     Scaffold(topBar = {
         TopAppBar() {
             Icon(imageVector = Icons.Default.ArrowBack , contentDescription = "Back",
@@ -28,7 +34,8 @@ fun PokemonsPantalla(navController: NavController){
 
     }) {
 
-            Pokemones()
+        Pokemones(pokemons = pokemonViewModel.listaPokemons)
+        pokemonViewModel.getPokemons()
     }
 }
 
@@ -39,7 +46,7 @@ y dentro del cuerpo del scaffold se agrega un espaciamiento y posteriormente un 
 
 @Composable
 
-fun Pokemon(name: String){
+fun Pokemon(result: Result){
     val expanded = remember { mutableStateOf(false)}
     val extraPadding = if (expanded.value) 48.dp else 0.dp
     Surface(color = MaterialTheme.colors.primary,
@@ -52,7 +59,7 @@ fun Pokemon(name: String){
                    .padding(bottom = extraPadding)
            ){
                Text(text = "Pokemon: ")
-               Text(text = name)
+               Text(text = result.name)
            }
 
             OutlinedButton(onClick = { expanded.value = !expanded.value}) {
@@ -64,21 +71,29 @@ fun Pokemon(name: String){
     }
 
     }
+
 @Composable
-private fun Pokemones(cameos: List<String> = List(10){"$it"}){
+
+private fun Pokemones(pokemons: List<Result>){
     val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier
-        .padding(vertical = 5.dp)
-        .verticalScroll(scrollState)) {
-        for(cameo in cameos){
-            Pokemon(cameo)
+    LazyColumn{
+
+        itemsIndexed(items = pokemons){index, item ->
+
+            Pokemon(result = item)
         }
     }
+
 }
 
 /*
 Surface retorna el buffer de lo que se está manejando para el compositor de pantalla
 Row como sun nombre lo dice crea una fila en la cual uno puede insertar distintos elementos que se van stackeando de forma horizontal
 OutlinedButton crea un boton con el perimetro marcado
+
+6. Por que retorna la lista de todos los pokemones
+8. El ViewModelScope se encarga de la cancelación y manejo de las corutinas
+12.  Para la creacion de comportamientos en clave morse
  */
+
